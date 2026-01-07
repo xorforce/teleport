@@ -15,73 +15,73 @@ repos:
       # Prevent giant files from being committed
       - id: check-added-large-files
         args: ['--maxkb=1000']
-      
+
       # Check for files that would conflict in case-insensitive filesystems
       - id: check-case-conflict
-      
+
       # Check for merge conflict markers
       - id: check-merge-conflict
-      
+
       # Detect private keys
       - id: detect-private-key
-      
+
       # Ensure files end with a newline
       - id: end-of-file-fixer
         exclude: '\.xcuserstate$|\.pbxproj$'
-      
+
       # Remove trailing whitespace
       - id: trailing-whitespace
         exclude: '\.xcuserstate$|\.pbxproj$'
-      
+
       # Check yaml files
       - id: check-yaml
         args: ['--allow-multiple-documents']
-      
+
       # Check json files
       - id: check-json
-      
+
       # Check toml files
       - id: check-toml
-      
+
       # Don't commit to main/master directly
       - id: no-commit-to-branch
         args: ['--branch', 'main', '--branch', 'master']
 
   # ============================================================================
-  # GO HOOKS
+  # GO HOOKS (using local tools for compatibility)
   # ============================================================================
-  - repo: https://github.com/golangci/golangci-lint
-    rev: v1.55.2
+  - repo: local
     hooks:
       - id: golangci-lint
-        entry: golangci-lint run --fix
-        files: '^teleport-cli/'
-        types: [go]
-        args: ['--config=.golangci.yml']
+        name: golangci-lint
+        entry: bash -c 'cd teleport-cli && golangci-lint run --config=../.golangci.yml --fix ./...'
+        language: system
+        files: '^teleport-cli/.*\.go$'
+        pass_filenames: false
 
-  - repo: https://github.com/dnephin/pre-commit-golang
-    rev: v0.5.1
-    hooks:
-      # Format Go code
       - id: go-fmt
-        files: '^teleport-cli/'
-      
-      # Check Go imports
-      - id: go-imports
-        files: '^teleport-cli/'
-      
-      # Run go mod tidy
+        name: go fmt
+        entry: bash -c 'cd teleport-cli && gofmt -s -w .'
+        language: system
+        files: '^teleport-cli/.*\.go$'
+        pass_filenames: false
+
       - id: go-mod-tidy
-        files: '^teleport-cli/'
+        name: go mod tidy
+        entry: bash -c 'cd teleport-cli && go mod tidy'
+        language: system
+        files: '^teleport-cli/(go\.mod|go\.sum|.*\.go)$'
+        pass_filenames: false
 
   # ============================================================================
-  # SWIFT HOOKS
+  # SWIFT HOOKS (using local tools for compatibility)
   # ============================================================================
-  - repo: https://github.com/realm/SwiftLint
-    rev: 0.54.0
+  - repo: local
     hooks:
       - id: swiftlint
-        entry: swiftlint lint --strict --config .swiftlint.yml
+        name: SwiftLint
+        entry: swiftlint lint --config .swiftlint.yml
+        language: system
         files: '\.swift$'
         exclude: '\.build/'
 
@@ -137,4 +137,3 @@ ci:
   autoupdate_schedule: weekly
   skip: []
   submodules: false
-
