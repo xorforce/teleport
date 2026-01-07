@@ -2,18 +2,13 @@
 
 Teleport helps you migrate all your Mac settings, packages, dotfiles, and configurations from one Mac to another. Export everything to a `.teleport` archive and import it on your new Mac.
 
-## Features by Branch
+## Features
 
-### Phase-1: Foundation and Core Infrastructure ✅
-
-**Available:**
 - CLI framework with `export` and `import` commands
 - SwiftUI Mac app with navigation structure
 - Category-based organization (8 categories defined)
 - Shared manifest schema (Go & Swift)
 - Basic export/import file handling
-
----
 
 ## Quick Start
 
@@ -50,8 +45,3 @@ teleport/
 
 - **CLI**: Go 1.21+
 - **Mac App**: macOS 13.0+, Xcode 15.0+
-
----
-
-*This README is updated as features are added to each branch.*
-
