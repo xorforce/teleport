@@ -20,7 +20,7 @@ struct Manifest: Codable {
     var ide: IDE?
     var fonts: [String]?
     var shellHistory: ShellHistory?
-    
+
     enum CodingKeys: String, CodingKey {
         case version
         case createdAt = "created_at"
@@ -34,7 +34,7 @@ struct Manifest: Codable {
         case fonts
         case shellHistory = "shell_history"
     }
-    
+
     init() {
         self.version = "1.0"
         self.createdAt = Date()
@@ -46,7 +46,7 @@ struct Manifest: Codable {
 struct MacOSInfo: Codable {
     let version: String
     let arch: String
-    
+
     init() {
         self.version = ProcessInfo.processInfo.operatingSystemVersionString
         #if arch(arm64)
@@ -76,7 +76,7 @@ struct PackageInfo: Codable, Identifiable {
     let id = UUID()
     let name: String
     let version: String
-    
+
     enum CodingKeys: String, CodingKey {
         case name, version
     }
@@ -87,7 +87,7 @@ struct Mise: Codable {
     var configFile: String?
     var toolVersions: String?
     var tools: [String: String]?
-    
+
     enum CodingKeys: String, CodingKey {
         case configFile = "config_file"
         case toolVersions = "tool_versions"
@@ -103,14 +103,14 @@ struct MacSettings: Codable {
 // MARK: - AnyCodable (Helper for Dictionary with Any values)
 struct AnyCodable: Codable {
     let value: Any
-    
+
     init(_ value: Any) {
         self.value = value
     }
-    
+
     init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
-        
+
         if let bool = try? container.decode(Bool.self) {
             value = bool
         } else if let int = try? container.decode(Int.self) {
@@ -127,10 +127,10 @@ struct AnyCodable: Codable {
             throw DecodingError.dataCorruptedError(in: container, debugDescription: "AnyCodable value cannot be decoded")
         }
     }
-    
+
     func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
-        
+
         switch value {
         case let bool as Bool:
             try container.encode(bool)
@@ -182,7 +182,7 @@ struct XcodeConfig: Codable {
 struct ShellHistory: Codable {
     var zshHistory: String?
     var bashHistory: String?
-    
+
     enum CodingKeys: String, CodingKey {
         case zshHistory = "zsh_history"
         case bashHistory = "bash_history"

@@ -10,7 +10,7 @@ import SwiftUI
 struct CategoryDetailView: View {
     let category: Category
     @ObservedObject var exportState: ExportState
-    
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
@@ -30,9 +30,9 @@ struct CategoryDetailView: View {
                     Spacer()
                 }
                 .padding()
-                
+
                 Divider()
-                
+
                 // Selection toggle
                 Toggle(isOn: Binding(
                     get: { exportState.selectedCategories.contains(category) },
@@ -42,20 +42,20 @@ struct CategoryDetailView: View {
                         .font(.headline)
                 }
                 .padding(.horizontal)
-                
+
                 Divider()
-                
+
                 // Category-specific content
                 categoryContent
                     .padding(.horizontal)
-                
+
                 Spacer()
             }
             .padding()
         }
         .navigationTitle(category.rawValue)
     }
-    
+
     @ViewBuilder
     private var categoryContent: some View {
         switch category {

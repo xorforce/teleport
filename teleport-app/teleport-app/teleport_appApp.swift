@@ -8,7 +8,7 @@
 import SwiftUI
 
 @main
-struct teleport_appApp: App {
+struct Teleport: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
