@@ -54,7 +54,6 @@ struct CategoryDetailView: View {
             .padding()
         }
         .navigationTitle(category.rawValue)
-        .navigationBarTitleDisplayMode(.inline)
     }
     
     @ViewBuilder
