@@ -7,7 +7,7 @@
 
 import XCTest
 
-final class teleport_appUITestsLaunchTests: XCTestCase {
+final class TeleportLaunchTests: XCTestCase {
 
     override class var runsForEachTargetApplicationUIConfiguration: Bool {
         true

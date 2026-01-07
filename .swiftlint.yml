@@ -1,0 +1,196 @@
+# SwiftLint configuration for teleport-app
+# Run with: swiftlint (from repo root)
+# Install: brew install swiftlint
+
+# Paths to include
+included:
+  - teleport-app
+
+# Paths to exclude
+excluded:
+  - teleport-app/teleport-app.xcodeproj
+  - teleport-app/**/xcuserdata
+  - teleport-app/**/*.xcworkspace
+  - Pods
+  - .build
+  - DerivedData
+
+# ============================================================================
+# DISABLED RULES
+# ============================================================================
+disabled_rules:
+  - trailing_whitespace        # Too noisy, handled by editors
+  - todo                       # Allow TODO comments in development
+  - opening_brace              # Conflicts with some SwiftUI patterns
+  - identifier_name            # Sometimes short names are appropriate
+  - type_name                  # Xcode generates names like teleport_appApp
+  - multiple_closures_with_trailing_closure  # Common in SwiftUI
+
+# ============================================================================
+# OPT-IN RULES
+# ============================================================================
+opt_in_rules:
+  # Code Quality
+  - empty_count                # Prefer isEmpty over count == 0
+  - empty_string               # Prefer isEmpty over comparing to ""
+  - first_where                # Prefer .first(where:) over .filter().first
+  - last_where                 # Prefer .last(where:) over .filter().last
+  - sorted_first_last          # Prefer min()/max() over sorted().first/last
+  - contains_over_first_not_nil # Prefer contains over first != nil
+  - contains_over_filter_count # Prefer contains over filter().count
+  - contains_over_filter_is_empty # Prefer contains over filter().isEmpty
+  - flatmap_over_map_reduce    # Prefer flatMap over map().reduce()
+  - reduce_boolean             # Prefer contains/allSatisfy over reduce(true/false)
+
+  # Style
+  - closure_spacing            # Consistent spacing in closures
+  - operator_usage_whitespace  # Consistent operator spacing
+  # - vertical_whitespace_closing_braces # Disabled: too strict for generated code
+  # - vertical_whitespace_opening_braces # Disabled: too strict for generated code
+  - yoda_condition             # Avoid Yoda conditions
+  - implicit_return            # Implicit return in single-expression closures
+  - multiline_arguments        # Multiline function arguments alignment
+  - multiline_parameters       # Multiline function parameters alignment
+
+  # Safety
+  - force_unwrapping           # Discourage force unwrapping
+  - fatal_error_message        # Require message in fatalError
+  - implicitly_unwrapped_optional # Warn on implicitly unwrapped optionals
+  # - empty_xctest_method      # Disabled: Xcode generates empty test methods
+  - overridden_super_call      # Super should be called
+  - prohibited_super_call      # Some methods shouldn't call super
+  - array_init                 # Prefer Array(seq) over seq.map { $0 }
+
+  # Documentation
+  - missing_docs               # Warn on missing documentation (public APIs)
+  - expiring_todo              # TODOs with expiration dates
+
+  # Performance
+  - reduce_into                # Prefer reduce(into:) for copy-on-write types
+
+# ============================================================================
+# RULE CONFIGURATIONS
+# ============================================================================
+
+# Line length
+line_length:
+  warning: 150
+  error: 200
+  ignores_comments: true
+  ignores_urls: true
+  ignores_function_declarations: false
+  ignores_interpolated_strings: true
+
+# File length
+file_length:
+  warning: 500
+  error: 1000
+  ignore_comment_only_lines: true
+
+# Type body length
+type_body_length:
+  warning: 300
+  error: 500
+
+# Function body length
+function_body_length:
+  warning: 50
+  error: 100
+
+# Function parameter count
+function_parameter_count:
+  warning: 6
+  error: 8
+  ignores_default_parameters: true
+
+# Identifier name (if enabled)
+# identifier_name:
+#   min_length:
+#     warning: 2
+#     error: 1
+#   max_length:
+#     warning: 50
+#     error: 60
+#   excluded:
+#     - id
+#     - i
+#     - x
+#     - y
+#     - z
+
+# Nesting
+nesting:
+  type_level:
+    warning: 3
+    error: 5
+  function_level:
+    warning: 3
+    error: 5
+
+# Cyclomatic complexity
+cyclomatic_complexity:
+  warning: 15
+  error: 25
+  ignores_case_statements: true
+
+# Large tuple
+large_tuple:
+  warning: 3
+  error: 4
+
+# Trailing comma - require trailing comma in multiline
+trailing_comma:
+  mandatory_comma: true
+
+# Vertical whitespace
+vertical_whitespace:
+  max_empty_lines: 2
+
+# Force unwrapping (if enabled)
+force_unwrapping:
+  severity: warning
+
+# Missing docs - only for public declarations
+missing_docs:
+  warning: public
+  excludes_extensions: true
+  excludes_inherited_types: true
+
+# Multiline arguments
+multiline_arguments:
+  first_argument_location: next_line
+  only_enforce_after_first_closure_on_first_line: true
+
+# ============================================================================
+# CUSTOM RULES
+# ============================================================================
+custom_rules:
+  # Discourage print statements in production code
+  no_print_statements:
+    name: "No print statements"
+    regex: "\\bprint\\s*\\("
+    message: "Use proper logging instead of print statements"
+    severity: warning
+    match_kinds:
+      - identifier
+
+  # Discourage NSLog in Swift
+  no_nslog:
+    name: "No NSLog"
+    regex: "\\bNSLog\\s*\\("
+    message: "Use os.log or proper logging framework instead of NSLog"
+    severity: warning
+    match_kinds:
+      - identifier
+
+  # Mark required for SwiftUI previews
+  preview_provider_naming:
+    name: "Preview Provider Naming"
+    regex: "struct\\s+(?!.*_Previews)\\w+\\s*:\\s*PreviewProvider"
+    message: "Preview providers should be named with _Previews suffix"
+    severity: warning
+
+# ============================================================================
+# REPORTER
+# ============================================================================
+reporter: "xcode"  # Options: xcode, json, csv, checkstyle, codeclimate, emoji, github-actions-logging, html, junit, markdown, sonarqube, summary

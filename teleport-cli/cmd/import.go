@@ -26,7 +26,6 @@ func runImport(cmd *cobra.Command, args []string) error {
 
 	fmt.Printf("Importing from: %s\n", archivePath)
 	fmt.Println("Phase 1: Foundation complete. Import functionality will be implemented in subsequent phases.")
-	
+
 	return nil
 }
-

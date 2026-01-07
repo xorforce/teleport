@@ -16,9 +16,9 @@ enum Category: String, CaseIterable, Identifiable {
     case ide = "IDE Profiles"
     case fonts = "Fonts"
     case shellHistory = "Shell History"
-    
+
     var id: String { rawValue }
-    
+
     var icon: String {
         switch self {
         case .homebrew: return "cup.and.saucer.fill"
@@ -31,7 +31,7 @@ enum Category: String, CaseIterable, Identifiable {
         case .shellHistory: return "terminal.fill"
         }
     }
-    
+
     var description: String {
         switch self {
         case .homebrew: return "Homebrew packages and casks"
@@ -45,4 +45,3 @@ enum Category: String, CaseIterable, Identifiable {
         }
     }
 }
-

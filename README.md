@@ -92,12 +92,90 @@ teleport/
 - **CLI**: Go 1.21+
 - **Mac App**: macOS 13.0+, Xcode 15.0+
 
+## Development
+
+### Prerequisites
+
+```bash
+# Install all development dependencies
+make setup
+```
+
+This installs:
+- **golangci-lint** - Go linter
+- **swiftlint** - Swift/SwiftUI linter
+- **swiftformat** - Swift formatter
+- **pre-commit** - Git hooks manager
+
+### Linting
+
+```bash
+# Run all linters
+make lint
+
+# Lint only Go code
+make lint-go
+
+# Lint only Swift code
+make lint-swift
+
+# Auto-fix lint issues where possible
+make lint-fix
+
+# Format all code
+make fmt
+```
+
+### Testing
+
+```bash
+# Run all tests
+make test
+
+# Run Go tests with coverage
+make test-go-coverage
+
+# Run Swift tests
+make test-swift
+```
+
+### Building
+
+```bash
+# Build everything
+make build
+
+# Build release versions
+make build-release
+```
+
+### Pre-commit Hooks
+
+Pre-commit hooks run automatically on every commit to catch issues early:
+
+```bash
+# Install hooks (done automatically by make setup)
+pre-commit install
+
+# Run hooks manually on all files
+make pre-commit
+```
+
+### Available Make Targets
+
+```bash
+make help  # Show all available targets
+```
+
 ## Contributing
 
 1. Fork the repository
 2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
+3. Install dev dependencies: `make setup`
+4. Make your changes
+5. Run linters: `make lint`
+6. Run tests: `make test`
+7. Submit a pull request
 
 ## License
 
