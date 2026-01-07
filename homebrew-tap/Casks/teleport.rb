@@ -1,6 +1,6 @@
 cask "teleport" do
-  version "0.1.0"
-  sha256 "PLACEHOLDER_APP_SHA256"
+  version "0.0.1"
+  sha256 "72aa2fd1e8f9f31595bc8fb2438132c608667983ed77741ec2613bd00043a87d"
 
   url "https://github.com/xorforce/teleport/releases/download/v#{version}/Teleport.dmg"
   name "Teleport"
