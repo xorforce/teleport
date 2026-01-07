@@ -41,7 +41,7 @@ opt_in_rules:
   - contains_over_filter_is_empty # Prefer contains over filter().isEmpty
   - flatmap_over_map_reduce    # Prefer flatMap over map().reduce()
   - reduce_boolean             # Prefer contains/allSatisfy over reduce(true/false)
-  
+
   # Style
   - closure_spacing            # Consistent spacing in closures
   - operator_usage_whitespace  # Consistent operator spacing
@@ -51,7 +51,7 @@ opt_in_rules:
   - implicit_return            # Implicit return in single-expression closures
   - multiline_arguments        # Multiline function arguments alignment
   - multiline_parameters       # Multiline function parameters alignment
-  
+
   # Safety
   - force_unwrapping           # Discourage force unwrapping
   - fatal_error_message        # Require message in fatalError
@@ -60,11 +60,11 @@ opt_in_rules:
   - overridden_super_call      # Super should be called
   - prohibited_super_call      # Some methods shouldn't call super
   - array_init                 # Prefer Array(seq) over seq.map { $0 }
-  
+
   # Documentation
   - missing_docs               # Warn on missing documentation (public APIs)
   - expiring_todo              # TODOs with expiration dates
-  
+
   # Performance
   - reduce_into                # Prefer reduce(into:) for copy-on-write types
 
@@ -74,7 +74,7 @@ opt_in_rules:
 
 # Line length
 line_length:
-  warning: 120
+  warning: 150
   error: 200
   ignores_comments: true
   ignores_urls: true
@@ -173,7 +173,7 @@ custom_rules:
     severity: warning
     match_kinds:
       - identifier
-  
+
   # Discourage NSLog in Swift
   no_nslog:
     name: "No NSLog"
@@ -182,7 +182,7 @@ custom_rules:
     severity: warning
     match_kinds:
       - identifier
-  
+
   # Mark required for SwiftUI previews
   preview_provider_naming:
     name: "Preview Provider Naming"
@@ -194,4 +194,3 @@ custom_rules:
 # REPORTER
 # ============================================================================
 reporter: "xcode"  # Options: xcode, json, csv, checkstyle, codeclimate, emoji, github-actions-logging, html, junit, markdown, sonarqube, summary
-
