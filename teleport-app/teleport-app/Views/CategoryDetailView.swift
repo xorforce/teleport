@@ -80,28 +80,184 @@ struct CategoryDetailView: View {
     }
 }
 
-// Placeholder views for each category (will be implemented in subsequent phases)
+// Category detail views
 struct HomebrewView: View {
     @ObservedObject var exportState: ExportState
+    @State private var homebrew: Homebrew?
+    @State private var isLoading = false
+    
     var body: some View {
-        Text("Homebrew detection will be implemented in Phase 2")
-            .foregroundColor(.secondary)
+        VStack(alignment: .leading, spacing: 16) {
+            if isLoading {
+                ProgressView("Detecting Homebrew packages...")
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding()
+            } else if let homebrew = homebrew {
+                if let packages = homebrew.packages, !packages.isEmpty {
+                    Text("\(packages.count) packages detected")
+                        .font(.headline)
+                    
+                    ScrollView {
+                        LazyVStack(alignment: .leading, spacing: 8) {
+                            ForEach(packages, id: \.self) { package in
+                                HStack {
+                                    Image(systemName: "checkmark.circle.fill")
+                                        .foregroundColor(.green)
+                                    Text(package)
+                                        .font(.system(.body, design: .monospaced))
+                                }
+                            }
+                        }
+                    }
+                    .frame(maxHeight: 300)
+                } else {
+                    Text("No Homebrew packages detected")
+                        .foregroundColor(.secondary)
+                }
+            } else {
+                Text("Homebrew not installed or not detected")
+                    .foregroundColor(.secondary)
+            }
+        }
+        .task {
+            isLoading = true
+            homebrew = await HomebrewService.shared.detectHomebrew()
+            isLoading = false
+        }
     }
 }
 
 struct NodePackagesView: View {
     @ObservedObject var exportState: ExportState
+    @State private var nodePackages: NodePackages?
+    @State private var isLoading = false
+    
     var body: some View {
-        Text("Node package manager detection will be implemented in Phase 2")
-            .foregroundColor(.secondary)
+        VStack(alignment: .leading, spacing: 16) {
+            if isLoading {
+                ProgressView("Detecting Node packages...")
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding()
+            } else if let nodePackages = nodePackages {
+                let totalCount = (nodePackages.npm?.count ?? 0) +
+                                (nodePackages.bun?.count ?? 0) +
+                                (nodePackages.pnpm?.count ?? 0) +
+                                (nodePackages.yarn?.count ?? 0)
+                
+                if totalCount > 0 {
+                    Text("\(totalCount) packages detected across package managers")
+                        .font(.headline)
+                    
+                    if let npm = nodePackages.npm, !npm.isEmpty {
+                        PackageManagerSection(title: "npm", packages: npm)
+                    }
+                    if let bun = nodePackages.bun, !bun.isEmpty {
+                        PackageManagerSection(title: "bun", packages: bun)
+                    }
+                    if let pnpm = nodePackages.pnpm, !pnpm.isEmpty {
+                        PackageManagerSection(title: "pnpm", packages: pnpm)
+                    }
+                    if let yarn = nodePackages.yarn, !yarn.isEmpty {
+                        PackageManagerSection(title: "yarn", packages: yarn)
+                    }
+                } else {
+                    Text("No Node packages detected")
+                        .foregroundColor(.secondary)
+                }
+            } else {
+                Text("No Node package managers detected")
+                    .foregroundColor(.secondary)
+            }
+        }
+        .task {
+            isLoading = true
+            nodePackages = await NodePackageService.shared.detectNodePackages()
+            isLoading = false
+        }
+    }
+}
+
+struct PackageManagerSection: View {
+    let title: String
+    let packages: [PackageInfo]
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(title.uppercased())
+                .font(.headline)
+                .foregroundColor(.secondary)
+            
+            ScrollView {
+                LazyVStack(alignment: .leading, spacing: 4) {
+                    ForEach(packages) { package in
+                        HStack {
+                            Image(systemName: "cube.fill")
+                                .foregroundColor(.blue)
+                            Text(package.name)
+                                .font(.system(.body, design: .monospaced))
+                            Spacer()
+                            Text(package.version)
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                }
+            }
+            .frame(maxHeight: 200)
+        }
+        .padding()
+        .background(Color.secondary.opacity(0.1))
+        .cornerRadius(8)
     }
 }
 
 struct MiseView: View {
     @ObservedObject var exportState: ExportState
+    @State private var mise: Mise?
+    @State private var isLoading = false
+    
     var body: some View {
-        Text("Mise detection will be implemented in Phase 2")
-            .foregroundColor(.secondary)
+        VStack(alignment: .leading, spacing: 16) {
+            if isLoading {
+                ProgressView("Detecting Mise tools...")
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding()
+            } else if let mise = mise {
+                if let tools = mise.tools, !tools.isEmpty {
+                    Text("\(tools.count) tools detected")
+                        .font(.headline)
+                    
+                    ScrollView {
+                        LazyVStack(alignment: .leading, spacing: 8) {
+                            ForEach(Array(tools.keys.sorted()), id: \.self) { tool in
+                                HStack {
+                                    Image(systemName: "wrench.and.screwdriver.fill")
+                                        .foregroundColor(.orange)
+                                    Text(tool)
+                                        .font(.system(.body, design: .monospaced))
+                                    Spacer()
+                                    Text(tools[tool] ?? "")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
+                            }
+                        }
+                    }
+                    .frame(maxHeight: 300)
+                } else {
+                    Text("No Mise tools detected")
+                        .foregroundColor(.secondary)
+                }
+            } else {
+                Text("Mise not installed or not detected")
+                    .foregroundColor(.secondary)
+            }
+        }
+        .task {
+            isLoading = true
+            mise = await MiseService.shared.detectMise()
+            isLoading = false
+        }
     }
 }
 

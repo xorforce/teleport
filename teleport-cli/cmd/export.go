@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
+	"github.com/teleport/teleport-cli/internal/exporter"
 )
 
 var exportCmd = &cobra.Command{
@@ -38,13 +39,16 @@ func runExport(cmd *cobra.Command, args []string) error {
 
 	fmt.Printf("Exporting to: %s\n", outputPath)
 	
-	// Create the archive directory
-	if err := os.MkdirAll(outputPath, 0755); err != nil {
-		return fmt.Errorf("failed to create export directory: %w", err)
+	// Use exporter package
+	progress := func(percent float64, message string) {
+		fmt.Printf("[%.0f%%] %s\n", percent*100, message)
 	}
 
-	fmt.Println("Phase 1: Foundation complete. Export functionality will be implemented in subsequent phases.")
-	
+	if err := exporter.ExportArchive(outputPath, progress); err != nil {
+		return fmt.Errorf("export failed: %w", err)
+	}
+
+	fmt.Println("Export complete!")
 	return nil
 }
 
