@@ -33,18 +33,17 @@ func runExport(cmd *cobra.Command, args []string) error {
 
 	// Ensure output path has .teleport extension
 	if filepath.Ext(outputPath) != ".teleport" {
-		outputPath = outputPath + ".teleport"
+		outputPath += ".teleport"
 	}
 
 	fmt.Printf("Exporting to: %s\n", outputPath)
-	
+
 	// Create the archive directory
-	if err := os.MkdirAll(outputPath, 0755); err != nil {
+	if err := os.MkdirAll(outputPath, 0o750); err != nil {
 		return fmt.Errorf("failed to create export directory: %w", err)
 	}
 
 	fmt.Println("Phase 1: Foundation complete. Export functionality will be implemented in subsequent phases.")
-	
+
 	return nil
 }
-

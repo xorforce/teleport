@@ -1,0 +1,140 @@
+# Pre-commit hooks configuration
+# Install: pip install pre-commit && pre-commit install
+# Or with Homebrew: brew install pre-commit && pre-commit install
+# Manual run: pre-commit run --all-files
+
+default_stages: [commit]
+
+repos:
+  # ============================================================================
+  # GENERAL HOOKS
+  # ============================================================================
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      # Prevent giant files from being committed
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+      
+      # Check for files that would conflict in case-insensitive filesystems
+      - id: check-case-conflict
+      
+      # Check for merge conflict markers
+      - id: check-merge-conflict
+      
+      # Detect private keys
+      - id: detect-private-key
+      
+      # Ensure files end with a newline
+      - id: end-of-file-fixer
+        exclude: '\.xcuserstate$|\.pbxproj$'
+      
+      # Remove trailing whitespace
+      - id: trailing-whitespace
+        exclude: '\.xcuserstate$|\.pbxproj$'
+      
+      # Check yaml files
+      - id: check-yaml
+        args: ['--allow-multiple-documents']
+      
+      # Check json files
+      - id: check-json
+      
+      # Check toml files
+      - id: check-toml
+      
+      # Don't commit to main/master directly
+      - id: no-commit-to-branch
+        args: ['--branch', 'main', '--branch', 'master']
+
+  # ============================================================================
+  # GO HOOKS
+  # ============================================================================
+  - repo: https://github.com/golangci/golangci-lint
+    rev: v1.55.2
+    hooks:
+      - id: golangci-lint
+        entry: golangci-lint run --fix
+        files: '^teleport-cli/'
+        types: [go]
+        args: ['--config=.golangci.yml']
+
+  - repo: https://github.com/dnephin/pre-commit-golang
+    rev: v0.5.1
+    hooks:
+      # Format Go code
+      - id: go-fmt
+        files: '^teleport-cli/'
+      
+      # Check Go imports
+      - id: go-imports
+        files: '^teleport-cli/'
+      
+      # Run go mod tidy
+      - id: go-mod-tidy
+        files: '^teleport-cli/'
+
+  # ============================================================================
+  # SWIFT HOOKS
+  # ============================================================================
+  - repo: https://github.com/realm/SwiftLint
+    rev: 0.54.0
+    hooks:
+      - id: swiftlint
+        entry: swiftlint lint --strict --config .swiftlint.yml
+        files: '\.swift$'
+        exclude: '\.build/'
+
+  # Optional: SwiftFormat for auto-formatting
+  # Uncomment if you install swiftformat: brew install swiftformat
+  # - repo: local
+  #   hooks:
+  #     - id: swiftformat
+  #       name: SwiftFormat
+  #       entry: swiftformat
+  #       language: system
+  #       files: '\.swift$'
+  #       exclude: '\.build/'
+  #       args: ['--config', '.swiftformat']
+
+  # ============================================================================
+  # MARKDOWN & DOCS
+  # ============================================================================
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.38.0
+    hooks:
+      - id: markdownlint
+        args: ['--fix', '--disable', 'MD013', 'MD033', 'MD041', '--']
+
+  # ============================================================================
+  # SECURITY SCANNING
+  # ============================================================================
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.4.0
+    hooks:
+      - id: detect-secrets
+        args: ['--baseline', '.secrets.baseline']
+        exclude: 'go\.sum$|package-lock\.json$'
+
+  # ============================================================================
+  # SHELL SCRIPTS
+  # ============================================================================
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.9.0.6
+    hooks:
+      - id: shellcheck
+        files: '\.sh$'
+
+# ============================================================================
+# CI CONFIGURATION
+# ============================================================================
+ci:
+  autofix_commit_msg: |
+    [pre-commit.ci] auto fixes from pre-commit hooks
+  autofix_prs: true
+  autoupdate_branch: ''
+  autoupdate_commit_msg: '[pre-commit.ci] pre-commit autoupdate'
+  autoupdate_schedule: weekly
+  skip: []
+  submodules: false
+

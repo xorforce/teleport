@@ -45,4 +45,3 @@ enum Category: String, CaseIterable, Identifiable {
         }
     }
 }
-

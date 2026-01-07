@@ -188,4 +188,3 @@ struct ShellHistory: Codable {
         case bashHistory = "bash_history"
     }
 }
-

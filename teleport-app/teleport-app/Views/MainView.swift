@@ -9,7 +9,7 @@ import SwiftUI
 
 struct MainView: View {
     @StateObject private var exportState = ExportState()
-    @State private var selectedCategory: Category? = nil
+    @State private var selectedCategory: Category?
     @State private var showingExportDialog = false
     
     var body: some View {
@@ -77,4 +77,3 @@ struct ContentPlaceholderView: View {
 #Preview {
     MainView()
 }
-

@@ -152,4 +152,3 @@ struct ShellHistoryView: View {
         )
     }
 }
-
