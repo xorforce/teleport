@@ -10,6 +10,7 @@ import SwiftUI
 struct MainView: View {
     @StateObject private var exportState = ExportState()
     @State private var selectedCategory: Category? = nil
+    @State private var showingExportDialog = false
     
     var body: some View {
         NavigationSplitView {
@@ -35,6 +36,21 @@ struct MainView: View {
             } else {
                 ContentPlaceholderView()
             }
+        }
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button(action: {
+                    showingExportDialog = true
+                }) {
+                    Text("Export")
+                        .padding(2)
+                }
+                .disabled(exportState.selectedCategories.isEmpty)
+                .help(exportState.selectedCategories.isEmpty ? "Select at least one category to export" : "Export selected settings")
+            }
+        }
+        .sheet(isPresented: $showingExportDialog) {
+            ExportDialogView(exportState: exportState)
         }
     }
 }

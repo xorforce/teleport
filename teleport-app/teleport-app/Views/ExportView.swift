@@ -7,59 +7,6 @@
 
 import SwiftUI
 
-struct ExportView: View {
-    @ObservedObject var exportState: ExportState
-    @State private var showingExportDialog = false
-    @State private var showingSuccessAlert = false
-    @State private var exportError: String?
-    
-    var body: some View {
-        VStack(spacing: 20) {
-            if exportState.isExporting {
-                ProgressView(value: exportState.exportProgress) {
-                    Text(exportState.currentOperation)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-                .padding()
-            } else {
-                Button(action: {
-                    showingExportDialog = true
-                }) {
-                    Label("Export Settings", systemImage: "square.and.arrow.up")
-                        .font(.headline)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                }
-                .buttonStyle(.borderedProminent)
-                .disabled(exportState.selectedCategories.isEmpty)
-            }
-            
-            if let exportPath = exportState.exportPath {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Last export:")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    Button(action: {
-                        NSWorkspace.shared.selectFile(exportPath.path, inFileViewerRootedAtPath: exportPath.deletingLastPathComponent().path)
-                    }) {
-                        Label(exportPath.lastPathComponent, systemImage: "doc")
-                            .font(.body)
-                    }
-                    .buttonStyle(.plain)
-                }
-                .padding()
-                .background(Color.secondary.opacity(0.1))
-                .cornerRadius(8)
-            }
-        }
-        .padding()
-        .sheet(isPresented: $showingExportDialog) {
-            ExportDialogView(exportState: exportState)
-        }
-    }
-}
-
 struct ExportDialogView: View {
     @ObservedObject var exportState: ExportState
     @Environment(\.dismiss) var dismiss
@@ -88,10 +35,13 @@ struct ExportDialogView: View {
                 List {
                     Section("Selected Categories") {
                         ForEach(Array(exportState.selectedCategories).sorted(by: { $0.rawValue < $1.rawValue })) { category in
+                            
                             Label(category.rawValue, systemImage: category.icon)
+                                .padding(2)
                         }
                     }
                 }
+                .listRowSeparator(.automatic)
                 .frame(height: 200)
             }
             
@@ -165,6 +115,5 @@ struct ExportDialogView: View {
 }
 
 #Preview {
-    ExportView(exportState: ExportState())
+    ExportDialogView(exportState: ExportState())
 }
-
