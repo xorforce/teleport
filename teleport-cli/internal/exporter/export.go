@@ -61,6 +61,7 @@ func exportHomebrew(outputPath string, m *manifest.Manifest) error {
 	m.Homebrew = &manifest.Homebrew{
 		Brewfile: homebrew.Brewfile,
 		Packages: homebrew.Packages,
+		Casks:    homebrew.Casks,
 	}
 
 	// Save Brewfile

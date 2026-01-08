@@ -29,7 +29,8 @@ type MacOSInfo struct {
 // Homebrew contains Homebrew-related data
 type Homebrew struct {
 	Brewfile string   `json:"brewfile"`
-	Packages []string `json:"packages,omitempty"`
+	Packages []string `json:"packages,omitempty"` // Formulae (CLI tools)
+	Casks    []string `json:"casks,omitempty"`    // Casks (GUI applications)
 }
 
 // NodePackages contains packages from various Node package managers
