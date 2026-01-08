@@ -83,7 +83,7 @@ struct CategoryDetailView: View {
 struct HomebrewView: View {
     @ObservedObject var exportState: ExportState
     @State private var homebrew: Homebrew?
-    @State private var isLoading = false
+    @State private var isLoading = true  // Start with loading state
     @State private var searchText = ""
     @State private var selectedTab = 0
 
@@ -331,7 +331,7 @@ struct PackageCard: View {
 struct NodePackagesView: View {
     @ObservedObject var exportState: ExportState
     @State private var nodePackages: NodePackages?
-    @State private var isLoading = false
+    @State private var isLoading = true  // Start with loading state
     @State private var searchText = ""
 
     private var npmCount: Int { nodePackages?.npm?.count ?? 0 }
@@ -499,7 +499,7 @@ struct NodePackageCard: View {
 struct MiseView: View {
     @ObservedObject var exportState: ExportState
     @State private var mise: Mise?
-    @State private var isLoading = false
+    @State private var isLoading = true  // Start with loading state
     @State private var searchText = ""
 
     private var tools: [String: String] { mise?.tools ?? [:] }
