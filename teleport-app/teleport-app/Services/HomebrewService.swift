@@ -14,7 +14,7 @@ class HomebrewService {
     private let brewPaths = [
         "/opt/homebrew/bin/brew",    // Apple Silicon Macs
         "/usr/local/bin/brew",        // Intel Macs
-        "/home/linuxbrew/.linuxbrew/bin/brew"  // Linux
+        "/home/linuxbrew/.linuxbrew/bin/brew",  // Linux
     ]
 
     private var brewPath: String? {
@@ -81,8 +81,7 @@ class HomebrewService {
             if process.terminationStatus == 0 {
                 return String(data: data, encoding: .utf8)
             }
-        } catch let error {
-            print(error)
+        } catch {
             return nil
         }
 

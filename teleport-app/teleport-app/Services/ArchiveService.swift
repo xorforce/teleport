@@ -36,6 +36,7 @@ class ArchiveService {
         return try decoder.decode(Manifest.self, from: data)
     }
 
+    // swiftlint:disable function_body_length
     func exportArchive(manifest: Manifest, selectedCategories: Set<Category>, progress: @escaping (Double, String) -> Void) async throws -> URL {
         var manifest = manifest
 
@@ -120,6 +121,7 @@ class ArchiveService {
 
         return archiveURL
     }
+    // swiftlint:enable function_body_length
 
     private func saveNodePackages(_ packages: [PackageInfo], to url: URL) throws {
         let encoder = JSONEncoder()

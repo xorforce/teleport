@@ -107,7 +107,7 @@ struct HomebrewView: View {
         VStack(alignment: .leading, spacing: 16) {
             if isLoading {
                 loadingView
-            } else if let homebrew = homebrew, totalCount > 0 {
+            } else if totalCount > 0 {
                 // Stats cards
                 statsCardsView
 
