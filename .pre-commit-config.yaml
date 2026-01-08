@@ -3,7 +3,7 @@
 # Or with Homebrew: brew install pre-commit && pre-commit install
 # Manual run: pre-commit run --all-files
 
-default_stages: [commit]
+default_stages: [pre-commit]
 
 repos:
   # ============================================================================

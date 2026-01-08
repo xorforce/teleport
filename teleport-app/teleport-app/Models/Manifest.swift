@@ -60,7 +60,8 @@ struct MacOSInfo: Codable {
 // MARK: - Homebrew
 struct Homebrew: Codable {
     let brewfile: String
-    var packages: [String]?
+    var packages: [String]?  // Formulae
+    var casks: [String]?     // GUI applications
 }
 
 // MARK: - NodePackages
@@ -147,7 +148,13 @@ struct AnyCodable: Codable {
             let codableDictionary = dictionary.mapValues { AnyCodable($0) }
             try container.encode(codableDictionary)
         default:
-            throw EncodingError.invalidValue(value, EncodingError.Context(codingPath: container.codingPath, debugDescription: "AnyCodable value cannot be encoded"))
+            throw EncodingError.invalidValue(
+                value,
+                EncodingError.Context(
+                    codingPath: container.codingPath,
+                    debugDescription: "AnyCodable value cannot be encoded"
+                )
+            )
         }
     }
 }
