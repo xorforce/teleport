@@ -24,11 +24,11 @@ jobs:
       - name: Build CLI binaries
         run: |
           cd teleport-cli
-          
+
           # Build for Apple Silicon
           GOOS=darwin GOARCH=arm64 go build -ldflags="-s -w" -o teleport .
           tar -czvf teleport-cli-darwin-arm64.tar.gz teleport
-          
+
           # Build for Intel
           GOOS=darwin GOARCH=amd64 go build -ldflags="-s -w" -o teleport .
           tar -czvf teleport-cli-darwin-amd64.tar.gz teleport
@@ -115,7 +115,7 @@ jobs:
 
             ```bash
             # Add the tap
-            brew tap xorforce/teleport https://github.com/xorforce/teleport
+            brew tap xorforce/teleport
 
             # Install CLI
             brew install xorforce/teleport/teleport-cli
@@ -147,38 +147,44 @@ jobs:
             ⚠️ **Note:** The macOS app is unsigned. See the [README](https://github.com/xorforce/teleport#installation) for instructions on opening unsigned apps.
           generate_release_notes: true
 
-      - name: Update Homebrew formulas
+      - name: Update Homebrew tap
+        env:
+          TAP_GITHUB_TOKEN: ${{ secrets.TAP_GITHUB_TOKEN }}
         run: |
           VERSION=${GITHUB_REF#refs/tags/v}
           ARM64_SHA=${{ steps.checksums.outputs.arm64_sha }}
           AMD64_SHA=${{ steps.checksums.outputs.amd64_sha }}
           APP_SHA=${{ steps.checksums.outputs.app_sha }}
 
+          # Clone the tap repository
+          git clone https://x-access-token:${TAP_GITHUB_TOKEN}@github.com/xorforce/homebrew-teleport.git tap
+          cd tap
+
           # Update CLI formula
-          sed -i "s/version \".*\"/version \"$VERSION\"/" homebrew-tap/Formula/teleport-cli.rb
-          sed -i "s/PLACEHOLDER_ARM64_SHA256/$ARM64_SHA/" homebrew-tap/Formula/teleport-cli.rb
-          sed -i "s/PLACEHOLDER_AMD64_SHA256/$AMD64_SHA/" homebrew-tap/Formula/teleport-cli.rb
+          sed -i 's/version "[^"]*"/version "'"$VERSION"'"/' Formula/teleport-cli.rb
+          sed -i 's/sha256 "[^"]*" # arm64/sha256 "'"$ARM64_SHA"'" # arm64/' Formula/teleport-cli.rb
+          sed -i 's/sha256 "[^"]*" # amd64/sha256 "'"$AMD64_SHA"'" # amd64/' Formula/teleport-cli.rb
 
           # Update Cask
-          sed -i "s/version \".*\"/version \"$VERSION\"/" homebrew-tap/Casks/teleport.rb
-          sed -i "s/PLACEHOLDER_APP_SHA256/$APP_SHA/" homebrew-tap/Casks/teleport.rb
+          sed -i 's/version "[^"]*"/version "'"$VERSION"'"/' Casks/teleport.rb
+          sed -i 's/sha256 "[^"]*"/sha256 "'"$APP_SHA"'"/' Casks/teleport.rb
 
-          echo "## Updated Homebrew Formulas" >> $GITHUB_STEP_SUMMARY
+          # Commit and push
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --staged --quiet || git commit -m "Update to v$VERSION"
+          git push
+
+          # Output summary
+          echo "## Updated Homebrew Tap" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### CLI Formula" >> $GITHUB_STEP_SUMMARY
           echo '```ruby' >> $GITHUB_STEP_SUMMARY
-          cat homebrew-tap/Formula/teleport-cli.rb >> $GITHUB_STEP_SUMMARY
+          cat Formula/teleport-cli.rb >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Cask" >> $GITHUB_STEP_SUMMARY
           echo '```ruby' >> $GITHUB_STEP_SUMMARY
-          cat homebrew-tap/Casks/teleport.rb >> $GITHUB_STEP_SUMMARY
+          cat Casks/teleport.rb >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
-
-      - name: Commit updated formulas
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "chore: update homebrew formulas for ${{ github.ref_name }}"
-          file_pattern: "homebrew-tap/**"
-          branch: main
-

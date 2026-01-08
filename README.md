@@ -16,7 +16,7 @@ Teleport helps you migrate all your Mac settings, packages, dotfiles, and config
 
 ```bash
 # Add the tap
-brew tap xorforce/teleport https://github.com/xorforce/teleport
+brew tap xorforce/teleport
 
 # Install CLI
 brew install xorforce/teleport/teleport-cli
@@ -78,11 +78,10 @@ The macOS app is not notarized with Apple. On first launch:
 
 ## Project Structure
 
-```
+```text
 teleport/
 ├── teleport-app/          # SwiftUI Mac application
 ├── teleport-cli/          # Go CLI application
-├── homebrew-tap/          # Homebrew formula and cask
 ├── scripts/               # Build scripts
 └── README.md
 ```
@@ -102,6 +101,7 @@ make setup
 ```
 
 This installs:
+
 - **golangci-lint** - Go linter
 - **swiftlint** - Swift/SwiftUI linter
 - **swiftformat** - Swift formatter
