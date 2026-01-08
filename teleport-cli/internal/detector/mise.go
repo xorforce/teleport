@@ -22,7 +22,8 @@ func DetectMise() (*MiseInfo, error) {
 
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
-		return info, nil
+		// Cannot get home directory, return empty info (not an error)
+		return info, nil //nolint:nilerr // Missing home dir is expected in some environments
 	}
 
 	// Check for mise config file
@@ -37,7 +38,8 @@ func DetectMise() (*MiseInfo, error) {
 	if _, err := os.Stat(toolVersionsPath); err == nil {
 		info.ToolVersions = toolVersionsPath
 		// Parse tool versions
-		if content, err := os.ReadFile(toolVersionsPath); err == nil {
+		content, err := os.ReadFile(toolVersionsPath) //nolint:gosec // Path is constructed from home directory
+		if err == nil {
 			parseToolVersions(string(content), info.Tools)
 		}
 	}
@@ -63,4 +65,3 @@ func parseToolVersions(content string, tools map[string]string) {
 		}
 	}
 }
-

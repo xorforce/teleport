@@ -8,7 +8,7 @@
 import Testing
 @testable import teleport_app
 
-struct teleport_appTests {
+struct TeleportTests {
 
     @Test func example() async throws {
         // Write your test here and use APIs like `#expect(...)` to check expected conditions.

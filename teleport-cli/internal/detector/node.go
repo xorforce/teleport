@@ -50,7 +50,8 @@ func DetectNodePackages() (*NodePackagesInfo, error) {
 // detectNPM detects globally installed npm packages
 func detectNPM() ([]NodePackageInfo, error) {
 	if _, err := exec.LookPath("npm"); err != nil {
-		return nil, nil // npm not installed
+		// npm not installed, return empty slice (not an error)
+		return nil, nil //nolint:nilerr // Not finding npm is expected
 	}
 
 	cmd := exec.Command("npm", "list", "-g", "--depth=0", "--json")
@@ -69,7 +70,7 @@ func detectNPM() ([]NodePackageInfo, error) {
 		return nil, err
 	}
 
-	var packages []NodePackageInfo
+	packages := make([]NodePackageInfo, 0, len(result.Dependencies))
 	for name, pkg := range result.Dependencies {
 		packages = append(packages, NodePackageInfo{
 			Name:    name,
@@ -83,7 +84,8 @@ func detectNPM() ([]NodePackageInfo, error) {
 // detectBun detects globally installed bun packages
 func detectBun() ([]NodePackageInfo, error) {
 	if _, err := exec.LookPath("bun"); err != nil {
-		return nil, nil // bun not installed
+		// bun not installed, return empty slice (not an error)
+		return nil, nil //nolint:nilerr // Not finding bun is expected
 	}
 
 	cmd := exec.Command("bun", "pm", "ls", "-g")
@@ -94,7 +96,7 @@ func detectBun() ([]NodePackageInfo, error) {
 
 	// Parse bun output (format: package@version)
 	lines := strings.Split(strings.TrimSpace(string(output)), "\n")
-	var packages []NodePackageInfo
+	packages := make([]NodePackageInfo, 0, len(lines))
 
 	for _, line := range lines {
 		line = strings.TrimSpace(line)
@@ -118,7 +120,8 @@ func detectBun() ([]NodePackageInfo, error) {
 // detectPNPM detects globally installed pnpm packages
 func detectPNPM() ([]NodePackageInfo, error) {
 	if _, err := exec.LookPath("pnpm"); err != nil {
-		return nil, nil // pnpm not installed
+		// pnpm not installed, return empty slice (not an error)
+		return nil, nil //nolint:nilerr // Not finding pnpm is expected
 	}
 
 	cmd := exec.Command("pnpm", "list", "-g", "--depth=0", "--json")
@@ -136,7 +139,7 @@ func detectPNPM() ([]NodePackageInfo, error) {
 		return nil, err
 	}
 
-	var packages []NodePackageInfo
+	packages := make([]NodePackageInfo, 0, len(result))
 	for _, pkg := range result {
 		packages = append(packages, NodePackageInfo{
 			Name:    pkg.Name,
@@ -150,7 +153,8 @@ func detectPNPM() ([]NodePackageInfo, error) {
 // detectYarn detects globally installed yarn packages
 func detectYarn() ([]NodePackageInfo, error) {
 	if _, err := exec.LookPath("yarn"); err != nil {
-		return nil, nil // yarn not installed
+		// yarn not installed, return empty slice (not an error)
+		return nil, nil //nolint:nilerr // Not finding yarn is expected
 	}
 
 	cmd := exec.Command("yarn", "global", "list", "--json")
@@ -161,7 +165,7 @@ func detectYarn() ([]NodePackageInfo, error) {
 
 	// Yarn outputs JSON lines, parse each line
 	lines := strings.Split(strings.TrimSpace(string(output)), "\n")
-	var packages []NodePackageInfo
+	packages := make([]NodePackageInfo, 0, len(lines))
 
 	for _, line := range lines {
 		line = strings.TrimSpace(line)
@@ -191,4 +195,3 @@ func detectYarn() ([]NodePackageInfo, error) {
 
 	return packages, nil
 }
-

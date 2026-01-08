@@ -7,16 +7,16 @@ import (
 
 // Manifest represents the schema for a teleport archive
 type Manifest struct {
-	Version     string    `json:"version"`
-	CreatedAt   time.Time `json:"created_at"`
-	MacOS       MacOSInfo `json:"macos"`
-	Homebrew    *Homebrew `json:"homebrew,omitempty"`
+	Version      string        `json:"version"`
+	CreatedAt    time.Time     `json:"created_at"`
+	MacOS        MacOSInfo     `json:"macos"`
+	Homebrew     *Homebrew     `json:"homebrew,omitempty"`
 	NodePackages *NodePackages `json:"node_packages,omitempty"`
-	Mise        *Mise     `json:"mise,omitempty"`
-	Dotfiles    []string  `json:"dotfiles,omitempty"`
-	MacSettings *MacSettings `json:"mac_settings,omitempty"`
-	IDE         *IDE      `json:"ide,omitempty"`
-	Fonts       []string  `json:"fonts,omitempty"`
+	Mise         *Mise         `json:"mise,omitempty"`
+	Dotfiles     []string      `json:"dotfiles,omitempty"`
+	MacSettings  *MacSettings  `json:"mac_settings,omitempty"`
+	IDE          *IDE          `json:"ide,omitempty"`
+	Fonts        []string      `json:"fonts,omitempty"`
 	ShellHistory *ShellHistory `json:"shell_history,omitempty"`
 }
 
@@ -48,9 +48,9 @@ type PackageInfo struct {
 
 // Mise contains mise tool versions
 type Mise struct {
-	ConfigFile    string            `json:"config_file,omitempty"`
-	ToolVersions  string            `json:"tool_versions,omitempty"`
-	Tools         map[string]string `json:"tools,omitempty"`
+	ConfigFile   string            `json:"config_file,omitempty"`
+	ToolVersions string            `json:"tool_versions,omitempty"`
+	Tools        map[string]string `json:"tools,omitempty"`
 }
 
 // MacSettings contains macOS system preferences
@@ -86,7 +86,7 @@ type XcodeConfig struct {
 
 // ShellHistory contains shell history files
 type ShellHistory struct {
-	ZshHistory string `json:"zsh_history,omitempty"`
+	ZshHistory  string `json:"zsh_history,omitempty"`
 	BashHistory string `json:"bash_history,omitempty"`
 }
 
@@ -120,4 +120,3 @@ func getArch() string {
 	// This will be properly implemented later
 	return "arm64"
 }
-

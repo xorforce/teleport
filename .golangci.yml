@@ -1,0 +1,102 @@
+# golangci-lint v2 configuration for teleport-cli
+# Run with: golangci-lint run ./teleport-cli/...
+# Install: brew install golangci-lint
+
+version: "2"
+
+run:
+  timeout: 5m
+  modules-download-mode: readonly
+
+# Formatters (separate from linters in v2)
+formatters:
+  enable:
+    - goimports
+  settings:
+    goimports:
+      local-prefixes:
+        - github.com/xorforce/teleport
+
+linters:
+  default: standard
+  enable:
+    # Additional recommended linters
+    - misspell      # Find misspelled words
+    - unconvert     # Remove unnecessary type conversions
+    - unparam       # Find unused function parameters
+    - gocritic      # Comprehensive linting
+    - revive        # Fast, configurable linter (golint replacement)
+    - errorlint     # Find errors that will cause problems with Go 1.13+ error wrapping
+    - exhaustive    # Check exhaustiveness of enum switch statements
+    - nilerr        # Find code that returns nil even if it checks that the error is not nil
+    - prealloc      # Find slice declarations that could be preallocated
+    - bodyclose     # Check HTTP response body is closed
+    - dupl          # Detect duplicate code
+    - gocyclo       # Cyclomatic complexity checker
+    - gosec         # Security checker
+
+  settings:
+    gocritic:
+      enabled-tags:
+        - diagnostic
+        - style
+        - performance
+      disabled-checks:
+        - whyNoLint
+
+    revive:
+      rules:
+        - name: blank-imports
+        - name: context-as-argument
+        - name: context-keys-type
+        - name: dot-imports
+        - name: error-return
+        - name: error-strings
+        - name: error-naming
+        - name: exported
+        - name: if-return
+        - name: increment-decrement
+        - name: var-naming
+        - name: var-declaration
+        # - name: package-comments  # Disabled: too strict for small projects
+        - name: range
+        - name: receiver-naming
+        - name: time-naming
+        - name: unexported-return
+        - name: indent-error-flow
+        - name: errorf
+
+    gocyclo:
+      min-complexity: 15
+
+    dupl:
+      threshold: 100
+
+    gosec:
+      excludes:
+        - G104  # Audit errors not checked (handled by errcheck)
+
+issues:
+  # Exclude some linters from running on tests
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - dupl
+        - gosec
+        - gocritic
+
+    # Exclude some staticcheck messages
+    - linters:
+        - staticcheck
+      text: "SA9003:"  # Empty branch
+
+    # Allow fmt.Println in main.go
+    - path: main\.go
+      linters:
+        - forbidigo
+
+  # Maximum issues count per one linter (0 = unlimited)
+  max-issues-per-linter: 0
+
+  # Maximum count of issues with the same text (0 = unlimited)
+  max-same-issues: 0

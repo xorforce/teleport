@@ -22,7 +22,8 @@ func DetectHomebrew() (*HomebrewInfo, error) {
 	// Check if brew command exists
 	brewPath, err := exec.LookPath("brew")
 	if err != nil {
-		return info, nil // Homebrew not installed, return empty info
+		// Homebrew not installed, return empty info (not an error)
+		return info, nil //nolint:nilerr // Not finding brew is expected, not an error
 	}
 
 	info.Installed = true
@@ -58,4 +59,3 @@ func GetBrewfilePath() string {
 	homeDir, _ := os.UserHomeDir()
 	return filepath.Join(homeDir, "Brewfile")
 }
-

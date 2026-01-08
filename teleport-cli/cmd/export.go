@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 	"time"
 
@@ -34,11 +33,11 @@ func runExport(cmd *cobra.Command, args []string) error {
 
 	// Ensure output path has .teleport extension
 	if filepath.Ext(outputPath) != ".teleport" {
-		outputPath = outputPath + ".teleport"
+		outputPath += ".teleport"
 	}
 
 	fmt.Printf("Exporting to: %s\n", outputPath)
-	
+
 	// Use exporter package
 	progress := func(percent float64, message string) {
 		fmt.Printf("[%.0f%%] %s\n", percent*100, message)
@@ -51,4 +50,3 @@ func runExport(cmd *cobra.Command, args []string) error {
 	fmt.Println("Export complete!")
 	return nil
 }
-

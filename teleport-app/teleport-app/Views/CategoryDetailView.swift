@@ -10,7 +10,7 @@ import SwiftUI
 struct CategoryDetailView: View {
     let category: Category
     @ObservedObject var exportState: ExportState
-    
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
@@ -30,9 +30,9 @@ struct CategoryDetailView: View {
                     Spacer()
                 }
                 .padding()
-                
+
                 Divider()
-                
+
                 // Selection toggle
                 Toggle(isOn: Binding(
                     get: { exportState.selectedCategories.contains(category) },
@@ -42,21 +42,20 @@ struct CategoryDetailView: View {
                         .font(.headline)
                 }
                 .padding(.horizontal)
-                
+
                 Divider()
-                
+
                 // Category-specific content
                 categoryContent
                     .padding(.horizontal)
-                
+
                 Spacer()
             }
             .padding()
         }
         .navigationTitle(category.rawValue)
-        .navigationBarTitleDisplayMode(.inline)
     }
-    
+
     @ViewBuilder
     private var categoryContent: some View {
         switch category {
@@ -85,7 +84,7 @@ struct HomebrewView: View {
     @ObservedObject var exportState: ExportState
     @State private var homebrew: Homebrew?
     @State private var isLoading = false
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             if isLoading {
@@ -96,7 +95,7 @@ struct HomebrewView: View {
                 if let packages = homebrew.packages, !packages.isEmpty {
                     Text("\(packages.count) packages detected")
                         .font(.headline)
-                    
+
                     ScrollView {
                         LazyVStack(alignment: .leading, spacing: 8) {
                             ForEach(packages, id: \.self) { package in
@@ -131,7 +130,7 @@ struct NodePackagesView: View {
     @ObservedObject var exportState: ExportState
     @State private var nodePackages: NodePackages?
     @State private var isLoading = false
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             if isLoading {
@@ -143,11 +142,11 @@ struct NodePackagesView: View {
                                 (nodePackages.bun?.count ?? 0) +
                                 (nodePackages.pnpm?.count ?? 0) +
                                 (nodePackages.yarn?.count ?? 0)
-                
+
                 if totalCount > 0 {
                     Text("\(totalCount) packages detected across package managers")
                         .font(.headline)
-                    
+
                     if let npm = nodePackages.npm, !npm.isEmpty {
                         PackageManagerSection(title: "npm", packages: npm)
                     }
@@ -180,13 +179,13 @@ struct NodePackagesView: View {
 struct PackageManagerSection: View {
     let title: String
     let packages: [PackageInfo]
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(title.uppercased())
                 .font(.headline)
                 .foregroundColor(.secondary)
-            
+
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 4) {
                     ForEach(packages) { package in
@@ -215,7 +214,7 @@ struct MiseView: View {
     @ObservedObject var exportState: ExportState
     @State private var mise: Mise?
     @State private var isLoading = false
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             if isLoading {
@@ -226,7 +225,7 @@ struct MiseView: View {
                 if let tools = mise.tools, !tools.isEmpty {
                     Text("\(tools.count) tools detected")
                         .font(.headline)
-                    
+
                     ScrollView {
                         LazyVStack(alignment: .leading, spacing: 8) {
                             ForEach(Array(tools.keys.sorted()), id: \.self) { tool in
@@ -309,4 +308,3 @@ struct ShellHistoryView: View {
         )
     }
 }
-

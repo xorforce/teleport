@@ -1,0 +1,184 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-cli:
+    name: Build CLI
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+
+      - name: Build CLI binaries
+        run: |
+          cd teleport-cli
+          
+          # Build for Apple Silicon
+          GOOS=darwin GOARCH=arm64 go build -ldflags="-s -w" -o teleport .
+          tar -czvf teleport-cli-darwin-arm64.tar.gz teleport
+          
+          # Build for Intel
+          GOOS=darwin GOARCH=amd64 go build -ldflags="-s -w" -o teleport .
+          tar -czvf teleport-cli-darwin-amd64.tar.gz teleport
+
+      - name: Upload CLI artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: cli-binaries
+          path: |
+            teleport-cli/teleport-cli-darwin-arm64.tar.gz
+            teleport-cli/teleport-cli-darwin-amd64.tar.gz
+
+  build-app:
+    name: Build macOS App
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode.app
+
+      - name: Build macOS App
+        run: |
+          cd teleport-app
+          xcodebuild -project teleport-app.xcodeproj \
+            -scheme teleport-app \
+            -configuration Release \
+            -archivePath build/teleport-app.xcarchive \
+            archive \
+            CODE_SIGN_IDENTITY="-" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Export App
+        run: |
+          cd teleport-app
+          mkdir -p export
+          cp -R build/teleport-app.xcarchive/Products/Applications/teleport-app.app export/
+
+      - name: Create DMG
+        run: |
+          cd teleport-app
+          mkdir -p dmg-contents
+          cp -R export/teleport-app.app dmg-contents/
+          ln -s /Applications dmg-contents/Applications
+          hdiutil create -volname "Teleport" -srcfolder dmg-contents -ov -format UDZO Teleport.dmg
+
+      - name: Upload App artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-app
+          path: teleport-app/Teleport.dmg
+
+  release:
+    name: Create Release
+    needs: [build-cli, build-app]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+
+      - name: Calculate SHA256 checksums
+        id: checksums
+        run: |
+          echo "arm64_sha=$(sha256sum cli-binaries/teleport-cli-darwin-arm64.tar.gz | cut -d ' ' -f 1)" >> $GITHUB_OUTPUT
+          echo "amd64_sha=$(sha256sum cli-binaries/teleport-cli-darwin-amd64.tar.gz | cut -d ' ' -f 1)" >> $GITHUB_OUTPUT
+          echo "app_sha=$(sha256sum macos-app/Teleport.dmg | cut -d ' ' -f 1)" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            cli-binaries/teleport-cli-darwin-arm64.tar.gz
+            cli-binaries/teleport-cli-darwin-amd64.tar.gz
+            macos-app/Teleport.dmg
+          body: |
+            ## Installation
+
+            ### Via Homebrew (Recommended)
+
+            ```bash
+            # Add the tap
+            brew tap xorforce/teleport https://github.com/xorforce/teleport
+
+            # Install CLI
+            brew install xorforce/teleport/teleport-cli
+
+            # Install macOS App
+            brew install --cask xorforce/teleport/teleport
+            ```
+
+            ### Manual Installation
+
+            **CLI:**
+            - Apple Silicon: `teleport-cli-darwin-arm64.tar.gz`
+            - Intel: `teleport-cli-darwin-amd64.tar.gz`
+
+            **macOS App:** `Teleport.dmg`
+
+            ---
+
+            ### SHA256 Checksums
+
+            ```
+            ${{ steps.checksums.outputs.arm64_sha }}  teleport-cli-darwin-arm64.tar.gz
+            ${{ steps.checksums.outputs.amd64_sha }}  teleport-cli-darwin-amd64.tar.gz
+            ${{ steps.checksums.outputs.app_sha }}  Teleport.dmg
+            ```
+
+            ---
+
+            ⚠️ **Note:** The macOS app is unsigned. See the [README](https://github.com/xorforce/teleport#installation) for instructions on opening unsigned apps.
+          generate_release_notes: true
+
+      - name: Update Homebrew formulas
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          ARM64_SHA=${{ steps.checksums.outputs.arm64_sha }}
+          AMD64_SHA=${{ steps.checksums.outputs.amd64_sha }}
+          APP_SHA=${{ steps.checksums.outputs.app_sha }}
+
+          # Update CLI formula
+          sed -i "s/version \".*\"/version \"$VERSION\"/" homebrew-tap/Formula/teleport-cli.rb
+          sed -i "s/PLACEHOLDER_ARM64_SHA256/$ARM64_SHA/" homebrew-tap/Formula/teleport-cli.rb
+          sed -i "s/PLACEHOLDER_AMD64_SHA256/$AMD64_SHA/" homebrew-tap/Formula/teleport-cli.rb
+
+          # Update Cask
+          sed -i "s/version \".*\"/version \"$VERSION\"/" homebrew-tap/Casks/teleport.rb
+          sed -i "s/PLACEHOLDER_APP_SHA256/$APP_SHA/" homebrew-tap/Casks/teleport.rb
+
+          echo "## Updated Homebrew Formulas" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### CLI Formula" >> $GITHUB_STEP_SUMMARY
+          echo '```ruby' >> $GITHUB_STEP_SUMMARY
+          cat homebrew-tap/Formula/teleport-cli.rb >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Cask" >> $GITHUB_STEP_SUMMARY
+          echo '```ruby' >> $GITHUB_STEP_SUMMARY
+          cat homebrew-tap/Casks/teleport.rb >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+      - name: Commit updated formulas
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: update homebrew formulas for ${{ github.ref_name }}"
+          file_pattern: "homebrew-tap/**"
+          branch: main
+
