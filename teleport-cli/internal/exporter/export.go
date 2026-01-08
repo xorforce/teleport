@@ -10,8 +10,15 @@ import (
 	"github.com/teleport/teleport-cli/internal/manifest"
 )
 
-// ExportArchive creates a .teleport archive with all detected items
-func ExportArchive(outputPath string, progress func(float64, string)) error {
+// CategoryOptions specifies which categories to export
+type CategoryOptions struct {
+	Homebrew bool
+	Node     bool
+	Mise     bool
+}
+
+// ExportArchive creates a .teleport archive with selected categories
+func ExportArchive(outputPath string, opts *CategoryOptions, progress func(float64, string)) error {
 	// Create archive directory
 	if err := os.MkdirAll(outputPath, 0o750); err != nil {
 		return fmt.Errorf("failed to create archive directory: %w", err)
@@ -21,21 +28,27 @@ func ExportArchive(outputPath string, progress func(float64, string)) error {
 	m := manifest.NewManifest()
 
 	// Detect Homebrew
-	progress(0.2, "Detecting Homebrew packages...")
-	if err := exportHomebrew(outputPath, m); err != nil {
-		return err
+	if opts.Homebrew {
+		progress(0.2, "Detecting Homebrew packages...")
+		if err := exportHomebrew(outputPath, m); err != nil {
+			return err
+		}
 	}
 
 	// Detect Node packages
-	progress(0.4, "Detecting Node package managers...")
-	if err := exportNodePackages(outputPath, m); err != nil {
-		return err
+	if opts.Node {
+		progress(0.4, "Detecting Node package managers...")
+		if err := exportNodePackages(outputPath, m); err != nil {
+			return err
+		}
 	}
 
 	// Detect Mise
-	progress(0.6, "Detecting Mise tools...")
-	if err := exportMise(outputPath, m); err != nil {
-		return err
+	if opts.Mise {
+		progress(0.6, "Detecting Mise tools...")
+		if err := exportMise(outputPath, m); err != nil {
+			return err
+		}
 	}
 
 	// Save manifest
