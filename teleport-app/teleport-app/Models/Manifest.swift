@@ -60,7 +60,8 @@ struct MacOSInfo: Codable {
 // MARK: - Homebrew
 struct Homebrew: Codable {
     let brewfile: String
-    var packages: [String]?
+    var packages: [String]?  // Formulae
+    var casks: [String]?     // GUI applications
 }
 
 // MARK: - NodePackages
