@@ -5,7 +5,7 @@
 //  Created by Bhagat Singh on 07/01/26.
 //
 
-import Foundation
+import SwiftUI
 
 enum Category: String, CaseIterable, Identifiable {
     case homebrew = "Homebrew"
@@ -29,6 +29,19 @@ enum Category: String, CaseIterable, Identifiable {
         case .ide: return "applescript.fill"
         case .fonts: return "textformat"
         case .shellHistory: return "terminal.fill"
+        }
+    }
+
+    var color: Color {
+        switch self {
+        case .homebrew: return .orange
+        case .nodePackages: return .green
+        case .mise: return .purple
+        case .dotfiles: return .cyan
+        case .macSettings: return .blue
+        case .ide: return .indigo
+        case .fonts: return .pink
+        case .shellHistory: return .mint
         }
     }
 
