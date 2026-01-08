@@ -10,6 +10,62 @@ import Foundation
 class NodePackageService {
     static let shared = NodePackageService()
 
+    private let homeDir = FileManager.default.homeDirectoryForCurrentUser
+
+    // Common installation paths for npm/node
+    private var npmPaths: [String] {
+        [
+            "/opt/homebrew/bin/npm",                    // Homebrew on Apple Silicon
+            "/usr/local/bin/npm",                       // Homebrew on Intel / system
+            homeDir.appendingPathComponent(".nvm/current/bin/npm").path,  // nvm
+            homeDir.appendingPathComponent(".fnm/current/bin/npm").path,  // fnm
+            homeDir.appendingPathComponent(".local/share/mise/shims/npm").path,  // mise shim
+            homeDir.appendingPathComponent(".asdf/shims/npm").path,       // asdf
+            homeDir.appendingPathComponent(".volta/bin/npm").path,        // volta
+        ]
+    }
+
+    // Common installation paths for bun
+    private var bunPaths: [String] {
+        [
+            homeDir.appendingPathComponent(".bun/bin/bun").path,  // Default bun install
+            "/opt/homebrew/bin/bun",                               // Homebrew on Apple Silicon
+            "/usr/local/bin/bun",                                  // Homebrew on Intel
+        ]
+    }
+
+    // Common installation paths for pnpm
+    private var pnpmPaths: [String] {
+        [
+            "/opt/homebrew/bin/pnpm",                   // Homebrew on Apple Silicon
+            "/usr/local/bin/pnpm",                      // Homebrew on Intel
+            homeDir.appendingPathComponent(".local/share/pnpm/pnpm").path,  // pnpm standalone
+            homeDir.appendingPathComponent(".nvm/current/bin/pnpm").path,   // nvm global install
+            homeDir.appendingPathComponent(".fnm/current/bin/pnpm").path,   // fnm global install
+            homeDir.appendingPathComponent(".local/share/mise/shims/pnpm").path,  // mise shim
+            homeDir.appendingPathComponent(".asdf/shims/pnpm").path,        // asdf
+            homeDir.appendingPathComponent(".volta/bin/pnpm").path,         // volta
+        ]
+    }
+
+    // Common installation paths for yarn
+    private var yarnPaths: [String] {
+        [
+            "/opt/homebrew/bin/yarn",                   // Homebrew on Apple Silicon
+            "/usr/local/bin/yarn",                      // Homebrew on Intel
+            homeDir.appendingPathComponent(".yarn/bin/yarn").path,           // yarn standalone
+            homeDir.appendingPathComponent(".nvm/current/bin/yarn").path,    // nvm global install
+            homeDir.appendingPathComponent(".fnm/current/bin/yarn").path,    // fnm global install
+            homeDir.appendingPathComponent(".local/share/mise/shims/yarn").path,  // mise shim
+            homeDir.appendingPathComponent(".asdf/shims/yarn").path,         // asdf
+            homeDir.appendingPathComponent(".volta/bin/yarn").path,          // volta
+        ]
+    }
+
+    private func findExecutable(in paths: [String]) -> String? {
+        paths.first { FileManager.default.fileExists(atPath: $0) }
+    }
+
     private init() {}
 
     func detectNodePackages() async -> NodePackages {
@@ -39,9 +95,9 @@ class NodePackageService {
     }
 
     private func detectNPM() -> [PackageInfo]? {
-        guard shellCommandExists("npm") else { return nil }
+        guard let npmPath = findExecutable(in: npmPaths) else { return nil }
 
-        guard let output = shellCommand("npm", arguments: ["list", "-g", "--depth=0", "--json"]),
+        guard let output = shellCommand(npmPath, arguments: ["list", "-g", "--depth=0", "--json"]),
               let data = output.data(using: .utf8),
               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
               let dependencies = json["dependencies"] as? [String: [String: Any]] else {
@@ -55,9 +111,9 @@ class NodePackageService {
     }
 
     private func detectBun() -> [PackageInfo]? {
-        guard shellCommandExists("bun") else { return nil }
+        guard let bunPath = findExecutable(in: bunPaths) else { return nil }
 
-        guard let output = shellCommand("bun", arguments: ["pm", "ls", "-g"]) else {
+        guard let output = shellCommand(bunPath, arguments: ["pm", "ls", "-g"]) else {
             return nil
         }
 
@@ -66,29 +122,55 @@ class NodePackageService {
                 let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
                 guard !trimmed.isEmpty else { return nil }
 
-                let parts = trimmed.components(separatedBy: "@")
-                guard parts.count == 2 else { return nil }
+                // bun outputs format like "package@version" or " └── package@version"
+                let cleaned = trimmed.replacingOccurrences(of: "└── ", with: "")
+                                     .replacingOccurrences(of: "├── ", with: "")
+                                     .trimmingCharacters(in: .whitespacesAndNewlines)
 
-                return PackageInfo(name: parts[0], version: parts[1])
+                // Handle scoped packages like @scope/package@version
+                if let lastAt = cleaned.lastIndex(of: "@"), lastAt != cleaned.startIndex {
+                    let name = String(cleaned[..<lastAt])
+                    let version = String(cleaned[cleaned.index(after: lastAt)...])
+                    return PackageInfo(name: name, version: version)
+                }
+
+                return nil
             }
     }
 
     private func detectPNPM() -> [PackageInfo]? {
-        guard shellCommandExists("pnpm") else { return nil }
+        guard let pnpmPath = findExecutable(in: pnpmPaths) else { return nil }
 
-        guard let output = shellCommand("pnpm", arguments: ["list", "-g", "--depth=0", "--json"]),
-              let data = output.data(using: .utf8),
-              let packages = try? JSONDecoder().decode([PackageInfo].self, from: data) else {
+        guard let output = shellCommand(pnpmPath, arguments: ["list", "-g", "--depth=0", "--json"]),
+              let data = output.data(using: .utf8) else {
             return nil
         }
 
-        return packages
+        // pnpm JSON output is an array of objects with name/version
+        if let jsonArray = try? JSONSerialization.jsonObject(with: data) as? [[String: Any]] {
+            return jsonArray.compactMap { item in
+                guard let name = item["name"] as? String,
+                      let version = item["version"] as? String else { return nil }
+                return PackageInfo(name: name, version: version)
+            }
+        }
+
+        // Sometimes pnpm returns a single object with dependencies
+        if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+           let dependencies = json["dependencies"] as? [String: [String: Any]] {
+            return dependencies.compactMap { name, info in
+                guard let version = info["version"] as? String else { return nil }
+                return PackageInfo(name: name, version: version)
+            }
+        }
+
+        return nil
     }
 
     private func detectYarn() -> [PackageInfo]? {
-        guard shellCommandExists("yarn") else { return nil }
+        guard let yarnPath = findExecutable(in: yarnPaths) else { return nil }
 
-        guard let output = shellCommand("yarn", arguments: ["global", "list", "--json"]) else {
+        guard let output = shellCommand(yarnPath, arguments: ["global", "list", "--json"]) else {
             return nil
         }
 
@@ -109,10 +191,24 @@ class NodePackageService {
             }
     }
 
-    private func shellCommandExists(_ command: String) -> Bool {
+    private func shellCommand(_ executablePath: String, arguments: [String] = []) -> String? {
         let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/usr/bin/which")
-        process.arguments = [command]
+        process.executableURL = URL(fileURLWithPath: executablePath)
+        process.arguments = arguments
+
+        // Set up environment with proper PATH
+        var environment = ProcessInfo.processInfo.environment
+        let additionalPaths = [
+            "/opt/homebrew/bin",
+            "/usr/local/bin",
+            homeDir.appendingPathComponent(".bun/bin").path,
+            homeDir.appendingPathComponent(".nvm/current/bin").path,
+            homeDir.appendingPathComponent(".fnm/current/bin").path,
+            homeDir.appendingPathComponent(".local/share/mise/shims").path,
+        ]
+        let currentPath = environment["PATH"] ?? "/usr/bin:/bin"
+        environment["PATH"] = (additionalPaths + [currentPath]).joined(separator: ":")
+        process.environment = environment
 
         let pipe = Pipe()
         process.standardOutput = pipe
@@ -120,28 +216,13 @@ class NodePackageService {
 
         do {
             try process.run()
-            process.waitUntilExit()
-            return process.terminationStatus == 0
-        } catch {
-            return false
-        }
-    }
 
-    private func shellCommand(_ command: String, arguments: [String] = []) -> String? {
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/usr/bin/env")
-        process.arguments = [command] + arguments
+            // Read data BEFORE waiting for exit to prevent pipe buffer deadlock
+            let data = pipe.fileHandleForReading.readDataToEndOfFile()
 
-        let pipe = Pipe()
-        process.standardOutput = pipe
-        process.standardError = Pipe()
-
-        do {
-            try process.run()
             process.waitUntilExit()
 
             if process.terminationStatus == 0 {
-                let data = pipe.fileHandleForReading.readDataToEndOfFile()
                 return String(data: data, encoding: .utf8)
             }
         } catch {
