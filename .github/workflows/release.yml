@@ -114,14 +114,11 @@ jobs:
             ### Via Homebrew (Recommended)
 
             ```bash
-            # Add the tap
-            brew tap xorforce/teleport
-
             # Install CLI
-            brew install xorforce/teleport/teleport-cli
+            brew install xorforce/tap/teleport-cli
 
             # Install macOS App
-            brew install --cask xorforce/teleport/teleport
+            brew install --cask xorforce/tap/teleport
             ```
 
             ### Manual Installation
@@ -157,7 +154,7 @@ jobs:
           APP_SHA=${{ steps.checksums.outputs.app_sha }}
 
           # Clone the tap repository
-          git clone https://x-access-token:${TAP_GITHUB_TOKEN}@github.com/xorforce/homebrew-teleport.git tap
+          git clone https://x-access-token:${TAP_GITHUB_TOKEN}@github.com/xorforce/homebrew-tap.git tap
           cd tap
 
           # Update CLI formula
