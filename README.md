@@ -15,14 +15,11 @@ Teleport helps you migrate all your Mac settings, packages, dotfiles, and config
 ### Via Homebrew (Recommended)
 
 ```bash
-# Add the tap
-brew tap xorforce/teleport
-
 # Install CLI
-brew install xorforce/teleport/teleport-cli
+brew install xorforce/tap/teleport-cli
 
 # Install macOS App
-brew install --cask xorforce/teleport/teleport
+brew install --cask xorforce/tap/teleport
 ```
 
 ### Manual Download
